@@ -12,9 +12,7 @@ const importData = async (schema, jsonDb, url, headers, overwrite) => {
   await createTables(schema, tables, url, headers, overwrite, runSql, sql)
   await trackTables(schema, tables, url, headers)
   await createRelationships(schema, tables, url, headers)
-  console.log('relationships created')
   const insertOrder = getInsertOrder(tables);
-  console.log('insertOrder', insertOrder)
   await insertData(schema, insertOrder, db, tables, url, headers);
 
   // createTables(schema, tables, url, headers, overwrite, runSql, sql).then(() => {
