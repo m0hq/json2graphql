@@ -1,11 +1,8 @@
 const fetch = require('node-fetch');
-const {cli} = require('cli-ux');
 const throwError = require('./error');
 
 const createTables = async (schema, tables, url, headers, overwrite, runSql, sql) => {
   if (overwrite) {
-    cli.action.stop('Skipped!');
-    cli.action.start('Creating tables');
     await runSql(sql, url, headers);
   } else {
     try {
@@ -32,13 +29,10 @@ const createTables = async (schema, tables, url, headers, overwrite, runSql, sql
         }
       }
       if (!found) {
-        cli.action.stop('Done!');
-        cli.action.start('Creating tables');
         await runSql(sql, url, headers);
       }
     } catch (e) {
       console.log('Unexpected: ', e);
-      process.exit(1);
     }
   }
 };

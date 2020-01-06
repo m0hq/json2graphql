@@ -1,6 +1,5 @@
 const {query} = require('graphqurl');
 const moment = require('moment');
-const {cli} = require('cli-ux');
 const throwError = require('./error');
 
 const getInsertOrder = tables => {
@@ -65,7 +64,6 @@ const insertData = async (schema, insertOrder, sampleData, tables, url, headers)
     variables[`objects_${tableName}`] = transformedData[tableName];
   });
   const mutation = `mutation ( ${objectString} ) { ${mutationString} }`;
-  cli.action.start('Inserting data');
   try {
     const response = await query({
       query: mutation,
@@ -74,7 +72,6 @@ const insertData = async (schema, insertOrder, sampleData, tables, url, headers)
       headers,
     });
     if (response.data !== null && response.data !== 'undefined') {
-      cli.action.stop('Done!');
     } else {
       throw new Error(response);
     }

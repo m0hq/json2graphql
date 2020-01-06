@@ -1,14 +1,14 @@
 const fetch = require('node-fetch');
 const throwError = require('./error');
 
-const trackTables = async (tables, url, headers) => {
+const trackTables = async (schema, tables, url, headers) => {
   const bulkQueryArgs = [];
   tables.forEach(table => {
     bulkQueryArgs.push({
       type: 'add_existing_table_or_view',
       args: {
         name: table.name,
-        schema: 'public',
+        schema,
       },
     });
   });

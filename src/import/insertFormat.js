@@ -1,7 +1,4 @@
-const {query} = require('graphqurl');
 const moment = require('moment');
-const {cli} = require('cli-ux');
-const throwError = require('./error');
 
 const getInsertOrder = tables => {
   let order = [];
@@ -54,7 +51,7 @@ const transformData = (data, tables) => {
   return newData;
 };
 
-const insertData = async (schema, insertOrder, sampleData, tables, url, headers) => {
+const insertFormat = async (schema, insertOrder, sampleData, tables) => {
   const transformedData = transformData(sampleData, tables);
   let mutationString = '';
   let objectString = '';
@@ -65,25 +62,10 @@ const insertData = async (schema, insertOrder, sampleData, tables, url, headers)
     variables[`objects_${tableName}`] = transformedData[tableName];
   });
   const mutation = `mutation ( ${objectString} ) { ${mutationString} }`;
-  cli.action.start('Inserting data');
-  try {
-    const response = await query({
-      query: mutation,
-      endpoint: `${url}/v1/graphql`,
-      variables,
-      headers,
-    });
-    if (response.data !== null && response.data !== 'undefined') {
-      cli.action.stop('Done!');
-    } else {
-      throw new Error(response);
-    }
-  } catch (e) {
-    throwError(JSON.stringify(e, null, 2));
-  }
+  return { mutation, variables }
 };
 
 module.exports = {
   getInsertOrder,
-  insertData,
+  insertFormat,
 };

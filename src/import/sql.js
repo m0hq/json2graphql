@@ -26,10 +26,10 @@ const runSql = async (sqlArray, url, headers) => {
   }
 };
 
-const generateCreateTableSql = metadata => {
+const generateCreateTableSql = (schema, metadata) => {
   const sqlArray = [];
   metadata.forEach(table => {
-    sqlArray.push(`drop table if exists public."${table.name}" cascade;`);
+    sqlArray.push(`drop table if exists ${schema}."${table.name}" cascade;`);
     let columnSql = '(';
     table.columns.forEach((column, i) => {
       if (column.name === 'id') {
@@ -39,28 +39,28 @@ const generateCreateTableSql = metadata => {
       }
       columnSql += (table.columns.length === i + 1) ? ' ) ' : ', ';
     });
-    const createTableSql = `create table public."${table.name}" ${columnSql};`;
+    const createTableSql = `create table ${schema}."${table.name}" ${columnSql};`;
     sqlArray.push(createTableSql);
   });
   return sqlArray;
 };
 
-const generateConstraintsSql = metadata => {
+const generateConstraintsSql = (schema, metadata) => {
   const sqlArray = [];
   metadata.forEach(table => {
     table.columns.forEach(column => {
       if (column.isForeign) {
-        const fkSql = `add foreign key ("${column.name}") references public."${column.name.substring(0, column.name.length - 3)}" ("id");`;
-        sqlArray.push(`alter table public."${table.name}" ${fkSql}`);
+        const fkSql = `add foreign key ("${column.name}") references ${schema}."${column.name.substring(0, column.name.length - 3)}" ("id");`;
+        sqlArray.push(`alter table ${schema}."${table.name}" ${fkSql}`);
       }
     });
   });
   return sqlArray;
 };
 
-const generateSql = metadata => {
-  const createTableSql = generateCreateTableSql(metadata);
-  const constraintsSql = generateConstraintsSql(metadata);
+const generateSql = (schema, metadata) => {
+  const createTableSql = generateCreateTableSql(schema, metadata);
+  const constraintsSql = generateConstraintsSql(schema, metadata);
   let sqlArray = [...createTableSql, ...constraintsSql];
   return sqlArray;
 };
