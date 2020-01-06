@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const throwError = require('./error');
+const throwError = require('./errorNoCli');
 
 const trackTables = async (schema, tables, url, headers) => {
   const bulkQueryArgs = [];
@@ -7,7 +7,7 @@ const trackTables = async (schema, tables, url, headers) => {
     bulkQueryArgs.push({
       type: 'add_existing_table_or_view',
       args: {
-        name: table.name,
+        name: `${table.name}`,
         schema,
       },
     });
@@ -26,6 +26,7 @@ const trackTables = async (schema, tables, url, headers) => {
   );
   if (resp.status !== 200) {
     const error = await resp.json();
+    console.log('trackTables error', error)
     throwError(JSON.stringify(error, null, 2));
   }
 };

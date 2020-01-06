@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const throwError = require('./error');
+const throwError = require('./errorNoCli');
 
 const createTables = async (schema, tables, url, headers, overwrite, runSql, sql) => {
   if (overwrite) {
@@ -20,13 +20,18 @@ const createTables = async (schema, tables, url, headers, overwrite, runSql, sql
         }
       );
       const dbTables = await resp.json();
-      const tableIndex = dbTables.result[0].indexOf('table_name');
       let found = false;
-      for (let i = dbTables.result.length - 1; i > 0; i--) {
-        if (tables.find(t => t.name === dbTables.result[i][tableIndex])) {
-          found = true;
-          throwError(`Message: Your JSON database contains tables that already exist in Postgres ${schema} schema. Please use the flag "--overwrite" to overwrite them.`);
+      const tableIndex = (dbTables.result && dbTables.result.length) > 0 ? dbTables.result[0].indexOf('table_name') : -1;
+      if (tableIndex >= 0 && dbTables.result.length > 1) {
+        for (let i = dbTables.result.length - 1; i > 0; i--) {
+          if (tables.find(t => t.name === dbTables.result[i][tableIndex])) {
+            found = true;
+            throwError(`Message: Your JSON database contains tables that already exist in Postgres ${schema} schema. Please use the flag "--overwrite" to overwrite them.`);
+          }
         }
+      } else {
+        const createSchema = [`CREATE SCHEMA ${schema};`]
+        await runSql(createSchema, url, headers);
       }
       if (!found) {
         await runSql(sql, url, headers);

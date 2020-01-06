@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const throwError = require('./error');
+const throwError = require('./errorNoCli');
 
 const runSql = async (sqlArray, url, headers) => {
   let sqlString = '';
@@ -22,6 +22,7 @@ const runSql = async (sqlArray, url, headers) => {
   );
   if (resp.status !== 200) {
     const error = await resp.json();
+    console.log('runSql error', error)
     throwError(JSON.stringify(error, null, 2));
   }
 };

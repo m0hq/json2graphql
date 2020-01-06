@@ -1,4 +1,4 @@
-const throwError = require('./error');
+const throwError = require('./errorNoCli');
 
 const getDataType = (data, column) => {
   if (typeof data === 'number') {

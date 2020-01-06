@@ -9,14 +9,22 @@ const importData = async (schema, jsonDb, url, headers, overwrite) => {
   const db = sanitizeData(jsonDb);
   const tables = generate(db);
   const sql = generateSql(schema, tables);
-  createTables(schema, tables, url, headers, overwrite, runSql, sql).then(() => {
-    trackTables(schema, tables, url, headers).then(() => {
-      createRelationships(tables, url, headers).then(() => {
-        const insertOrder = getInsertOrder(tables);
-        insertData(schema, insertOrder, db, tables, url, headers);
-      });
-    });
-  });
+  await createTables(schema, tables, url, headers, overwrite, runSql, sql)
+  await trackTables(schema, tables, url, headers)
+  await createRelationships(schema, tables, url, headers)
+  console.log('relationships created')
+  const insertOrder = getInsertOrder(tables);
+  console.log('insertOrder', insertOrder)
+  await insertData(schema, insertOrder, db, tables, url, headers);
+
+  // createTables(schema, tables, url, headers, overwrite, runSql, sql).then(() => {
+  //   trackTables(schema, tables, url, headers).then(() => {
+  //     createRelationships(tables, url, headers).then(() => {
+  //       const insertOrder = getInsertOrder(tables);
+  //       insertData(schema, insertOrder, db, tables, url, headers);
+  //     });
+  //   });
+  // });
 };
 
 module.exports = importData;

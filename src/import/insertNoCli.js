@@ -1,6 +1,6 @@
 const {query} = require('graphqurl');
 const moment = require('moment');
-const throwError = require('./error');
+const throwError = require('./errorNoCli');
 
 const getInsertOrder = tables => {
   let order = [];
@@ -60,7 +60,7 @@ const insertData = async (schema, insertOrder, sampleData, tables, url, headers)
   const variables = {};
   insertOrder.forEach(tableName => {
     mutationString += `insert_${schema}_${tableName} ( objects: $objects_${tableName} ) { affected_rows } \n`;
-    objectString += `$objects_${tableName}: [${tableName}_insert_input!]!,\n`;
+    objectString += `$objects_${tableName}: [${schema}_${tableName}_insert_input!]!,\n`;
     variables[`objects_${tableName}`] = transformedData[tableName];
   });
   const mutation = `mutation ( ${objectString} ) { ${mutationString} }`;

@@ -1,5 +1,5 @@
 const fetch = require('node-fetch');
-const throwError = require('./error');
+const throwError = require('./errorNoCli');
 
 const getObjRelationshipName = dep => {
   const relName = `${dep}By${dep[0].toUpperCase()}`;
@@ -11,7 +11,7 @@ const getArrayRelationshipName = (table, parent) => {
   return parent.length === 1 ? `${relName}Id` : `${relName}${parent.substring(1, parent.length)}Id`;
 };
 
-const generateRelationships = tables => {
+const generateRelationships = (schema, tables) => {
   const objectRelationships = [];
   const arrayRelationships = [];
   tables.forEach(table => {
@@ -20,7 +20,10 @@ const generateRelationships = tables => {
         objectRelationships.push({
           type: 'create_object_relationship',
           args: {
-            table: table.name,
+            table: {
+              schema,
+              name: table.name,
+            },
             name: `${getObjRelationshipName(dep)}`,
             using: {
               foreign_key_constraint_on: `${dep}_id`,
@@ -30,11 +33,17 @@ const generateRelationships = tables => {
         arrayRelationships.push({
           type: 'create_array_relationship',
           args: {
-            table: dep,
+            table: {
+              schema,
+              name: dep,
+            },
             name: `${getArrayRelationshipName(table.name, dep)}`,
             using: {
               foreign_key_constraint_on: {
-                table: table.name,
+                table: {
+                  schema,
+                  name: table.name,
+                },
                 column: `${dep}_id`,
               },
             },
@@ -49,8 +58,8 @@ const generateRelationships = tables => {
   };
 };
 
-const createRelationships = async (tables, url, headers) => {
-  const relationships = generateRelationships(tables);
+const createRelationships = async (schema, tables, url, headers) => {
+  const relationships = generateRelationships(schema, tables);
   const bulkQuery = {
     type: 'bulk',
     args: [],
@@ -67,6 +76,7 @@ const createRelationships = async (tables, url, headers) => {
   );
   if (resp.status !== 200) {
     const error = await resp.json();
+    console.log('relationships error', error)
     throwError(JSON.stringify(error, null, 2));
   }
 };
