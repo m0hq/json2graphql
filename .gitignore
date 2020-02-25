@@ -7,3 +7,4 @@
 /test-db.js
 test-db
 node_modules
+.npmrc

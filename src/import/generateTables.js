@@ -32,6 +32,16 @@ const isForeign = (name, db) => {
   return false;
 };
 
+const isCascadeNull = (data, name, db) => {
+  const key = `cascade_null_${name}`
+  return !!data[key]
+};
+
+const isCascadeDelete = (data, name, db) => {
+  const key = `cascade_delete_${name}`
+  return !!data[key]
+};
+
 const getColumnData = (dataArray, db) => {
   let refColumns = {};
   dataArray.forEach(row => {
@@ -50,6 +60,10 @@ const getColumnData = (dataArray, db) => {
     const sampleData = refColumns[column];
     columnMetadata.type = getDataType(sampleData, column, db);
     columnMetadata.isForeign = isForeign(column, db);
+    if (columnMetadata.isForeign) {
+      columnMetadate.isCascadeDelete = isCascadeDelete(refColumns, column, db)
+      columnMetadate.isCascadeNull = isCascadeNull(refColumns, column, db)
+    }
     columnData.push(columnMetadata);
   });
   return columnData;
