@@ -38,7 +38,13 @@ const transformData = (data, tables) => {
     const tableData = data[table.name];
     newData[table.name] = [];
     tableData.forEach(row => {
-      const newRow = {...row};
+      const filtered = {}
+      Object.keys(row).forEach(column => {
+        if (column.indexOf('cascade_null_') !== 0 && column.indexOf('cascade_delete_') !== 0) {
+          filtered[column] = row[column]
+        }
+      })
+      const newRow = {...filtered };
       table.columns.forEach(column => {
         if (column.type === 'timestamptz' && row[column.name]) {
           newRow[column.name] = moment(row[column.name]).format();

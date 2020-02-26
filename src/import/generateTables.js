@@ -61,8 +61,8 @@ const getColumnData = (dataArray, db) => {
     columnMetadata.type = getDataType(sampleData, column, db);
     columnMetadata.isForeign = isForeign(column, db);
     if (columnMetadata.isForeign) {
-      columnMetadate.isCascadeDelete = isCascadeDelete(refColumns, column, db)
-      columnMetadate.isCascadeNull = isCascadeNull(refColumns, column, db)
+      columnMetadata.isCascadeDelete = isCascadeDelete(refColumns, column, db)
+      columnMetadata.isCascadeNull = isCascadeNull(refColumns, column, db)
     }
     columnData.push(columnMetadata);
   });

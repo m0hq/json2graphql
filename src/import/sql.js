@@ -32,17 +32,14 @@ const generateCreateTableSql = (schema, metadata) => {
   metadata.forEach(table => {
     sqlArray.push(`drop table if exists ${schema}."${table.name}" cascade;`);
     let columnSql = '(';
-    table.columns.forEach((column, i) => {
-      const maybeCascadeNull = column.name.indexOf('cascade_null_') === 0
-      const maybeCascadeDelete = column.name.indexOf('cascade_delete_') === 0
-      if (!maybeCascadeDelete && !maybeCascadeNull) {
-        if (column.name === 'id') {
-          columnSql += `"id" ${column.type} not null primary key`;
-        } else {
-          columnSql += `"${column.name}" ${column.type}`;
-        }
-        columnSql += (table.columns.length === i + 1) ? ' ) ' : ', ';
+    const filtered = table.columns.filter(column => column.name.indexOf('cascade_null_') !== 0 && column.name.indexOf('cascade_delete_') !== 0)
+    filtered.forEach((column, i) => {
+      if (column.name === 'id') {
+        columnSql += `"id" ${column.type} not null primary key`;
+      } else {
+        columnSql += `"${column.name}" ${column.type}`;
       }
+      columnSql += (filtered.length === i + 1) ? ' ) ' : ', ';
     });
     const createTableSql = `create table ${schema}."${table.name}" ${columnSql};`;
     sqlArray.push(createTableSql);
@@ -55,7 +52,7 @@ const generateConstraintsSql = (schema, metadata) => {
   metadata.forEach(table => {
     table.columns.forEach(column => {
       if (column.isForeign) {
-        const suffix = table.isCascadeDelete ? ' on delete cascade' : table.isCascadeNull ? ' on delete set null' : ''
+        const suffix = column.isCascadeDelete ? ' on delete cascade' : column.isCascadeNull ? ' on delete set null' : ''
         const fkSql = `add foreign key ("${column.name}") references ${schema}."${column.name.substring(0, column.name.length - 3)}" ("id") ${suffix};`;
         sqlArray.push(`alter table ${schema}."${table.name}" ${fkSql}`);
       }
